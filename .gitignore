@@ -1,0 +1,15 @@
+# dependências
+/backend/vendor
+/frontend/node_modules
+
+# ambiente
+.env
+*.env
+!.env.example
+
+# logs e cache
+*.log
+/backend/storage/*.key
+
+# sistema
+.DS_Store
