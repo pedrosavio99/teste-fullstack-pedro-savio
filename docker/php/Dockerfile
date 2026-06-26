@@ -1,5 +1,5 @@
 # Imagem base: PHP 8.3 com PHP-FPM (gerencia os processos PHP por trás de um servidor web)
-FROM php:8.3-fpm
+FROM php:8.4-fpm
 
 # Argumentos pra criar um usuário com o mesmo ID do seu usuário do host.
 # Isso evita problemas de permissão nos arquivos compartilhados entre host e container.
