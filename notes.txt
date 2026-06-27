@@ -5,3 +5,5 @@ docker compose ps
 sudo chown -R $USER:$USER backend
 
 docker compose exec app php artisan config:clear
+
+docker compose exec app php artisan migrate
