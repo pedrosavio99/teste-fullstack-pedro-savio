@@ -1,0 +1,140 @@
+{
+  "name": "Pedido Aprovado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "order-approved",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "50681efd-f0d9-4c1c-bce4-b89301a1f31f",
+      "name": "Webhook",
+      "webhookId": "78e47d57-0c71-4ce0-9801-e60ebfd8a419"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a1c3b7d2-1ca6-4de9-b573-c0bdc989a6ac",
+              "leftValue": "={{ $json.body.new_status }}",
+              "rightValue": "approved",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "60bfe3c4-b57a-4a0d-ae7d-3be2e06fe31c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://webhook.site/f4f804d4-f6bf-4abb-a567-4755dc685561",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"sheet\": \"pedidos_aprovados\",\n  \"order_id\": {{ $('Webhook').item.json.body.order_id }},\n  \"affiliate_id\": {{ $('Webhook').item.json.body.affiliate_id }},\n  \"total_value\": {{ $('Webhook').item.json.body.total_value }},\n  \"approved_at\": \"{{ $('Webhook').item.json.body.occurred_at }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "49deb57f-3e03-4057-8563-c92ea7909f81",
+      "name": "Registrar no Google Sheets (mock)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://webhook.site/f4f804d4-f6bf-4abb-a567-4755dc685561",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"✅ Pedido #{{ $('Webhook').item.json.body.order_id }} aprovado — R$ {{ $('Webhook').item.json.body.total_value }} | Afiliado #{{ $('Webhook').item.json.body.affiliate_id }}\",\n  \"order_id\": {{ $('Webhook').item.json.body.order_id }},\n  \"affiliate_id\": {{ $('Webhook').item.json.body.affiliate_id }},\n  \"total_value\": {{ $('Webhook').item.json.body.total_value }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        -96
+      ],
+      "id": "ac208906-8532-43ac-8bc4-017ef7759c1c",
+      "name": "Notificar canal (mock)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Notificar canal (mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificar canal (mock)": {
+      "main": [
+        [
+          {
+            "node": "Registrar no Google Sheets (mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "3c7e75e7-395a-46de-a3d9-0a54528d7b82",
+  "meta": {
+    "instanceId": "67f6136e8be012d9b57e5f28f2c1eb61ae71b3460692a76f936835de3af47ae5"
+  },
+  "nodeGroups": [],
+  "id": "CpoRpVkjCvJCFU2M",
+  "tags": []
+}

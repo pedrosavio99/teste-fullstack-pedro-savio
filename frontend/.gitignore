@@ -1,0 +1,32 @@
+# ===== Dependências =====
+/backend/vendor
+/frontend/node_modules
+node_modules
+
+# ===== Ambiente =====
+.env
+*.env
+!.env.example
+
+# ===== Build / dist do frontend =====
+/frontend/dist
+/frontend/.vite
+*.local
+
+# ===== Cache e logs =====
+*.log
+/backend/storage/*.key
+/backend/storage/logs/*
+/frontend/npm-debug.log*
+/frontend/yarn-debug.log*
+/frontend/yarn-error.log*
+
+# ===== Editor / Sistema =====
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
