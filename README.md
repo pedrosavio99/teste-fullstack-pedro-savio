@@ -54,10 +54,8 @@ O backend segue arquitetura em camadas:
 - **OrderService** — concentra as regras de negócio e a máquina de estados.
 - **OrderRepository** — isola as queries do Eloquent.
 
-> **Imagem sugerida:** uma visão geral do dashboard.
-> Salve o print como `docs/img/frontend-dashboard.png` para aparecer aqui:
->
-> ![Dashboard](docs/img/frontend-dashboard.png)
+<img width="1363" height="697" alt="image" src="https://github.com/user-attachments/assets/368d08cf-1010-4e88-a74f-5dc7c4144bd4" />
+
 
 ---
 
@@ -242,15 +240,13 @@ Os dois workflows estão exportados em [`n8n/workflows/`](n8n/workflows/) como J
 
 **Workflow 1 — Pedido aprovado** (`order-approved.json`): recebe o webhook, filtra `new_status = approved`, formata a mensagem de notificação e registra. Os destinos (Slack/Discord/Sheets) são representados por nós HTTP apontando para o webhook.site, conforme autorizado pelo desafio.
 
-> **Imagens sugeridas:** salve os prints como abaixo para aparecerem aqui.
->
-> ![Workflow Pedido Aprovado](docs/img/n8n-workflow-aprovado.png)
-> ![Execução do Workflow Aprovado](docs/img/n8n-execucao-aprovado.png)
+<img width="1358" height="698" alt="image" src="https://github.com/user-attachments/assets/77f68c13-f07d-4071-adf9-f87c2d0874fe" />
+
 
 **Workflow 2 — Pedido cancelado** (`order-cancelled.json`): recebe o webhook, filtra `cancelled`, consulta `GET http://nginx/api/affiliates/{id}/summary` na própria API para obter a taxa de cancelamento e, por decisão condicional, dispara um alerta de atenção quando a taxa passa de 30%. O cancelamento é sempre registrado, com os dois caminhos convergindo no registro final.
 
-> ![Workflow Pedido Cancelado](docs/img/n8n-workflow-cancelado.png)
-> ![Execução do Workflow Cancelado](docs/img/n8n-execucao-cancelado.png)
+<img width="1355" height="701" alt="image" src="https://github.com/user-attachments/assets/3bbc529e-27e3-4ee8-9961-03f7c82c7925" />
+
 
 ### Como importar e testar os workflows localmente
 
@@ -275,10 +271,8 @@ Funcionalidades:
 - **Responsividade:** funcional de 360px a 1440px; no mobile a tabela vira lista de cards.
 - **Acessibilidade:** `aria-label` nos elementos interativos e foco visível.
 
-> **Imagem sugerida:** o drawer de detalhes aberto, com a timeline.
-> Salve o print como `docs/img/frontend-drawer.png`:
->
-> ![Drawer de detalhes](docs/img/frontend-drawer.png)
+<img width="1349" height="656" alt="image" src="https://github.com/user-attachments/assets/22294a97-e623-4bea-8c41-995304aaa94c" />
+
 
 ---
 
