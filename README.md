@@ -103,6 +103,8 @@ Isso sobe PHP, Nginx, MySQL, Redis, Worker e N8N. Na primeira vez o build demora
 ### 4. Preparar o Laravel
 
 ```bash
+docker compose exec app composer install
+
 # gerar a chave da aplicação
 docker compose exec app php artisan key:generate
 
