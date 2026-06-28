@@ -1,7 +1,9 @@
-<script setup>
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <HelloWorld />
+  <div class="min-h-screen">
+    <router-view />
+  </div>
 </template>
+
+<script setup>
+// App raiz: apenas renderiza a rota atual.
+</script>
