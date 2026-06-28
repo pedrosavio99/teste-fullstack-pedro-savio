@@ -1,0 +1,216 @@
+{
+  "name": "Pedido Cancelado",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "order-cancelled",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "7b9533fe-7c37-463e-ba64-658d9b3d6f0f",
+      "name": "Webhook",
+      "webhookId": "3e9224ef-b524-46a5-a094-f604ab097c16"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "b107421b-9db3-4a95-a077-56ccd3abf733",
+              "leftValue": "={{ $json.body.new_status }}",
+              "rightValue": "cancelled",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "68a2e153-0e33-4c56-bf2e-c21318f441a4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "url": "=http://nginx/api/affiliates/{{ $('Webhook').item.json.body.affiliate_id }}/summary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        448,
+        -48
+      ],
+      "id": "43f51915-276d-44de-8658-d45e807e06f7",
+      "name": "Consultar resumo do afiliado"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3531fb0b-2743-4a3e-a648-131bfe600130",
+              "leftValue": "={{ $json.data.cancellation_rate }}",
+              "rightValue": 30,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        608,
+        64
+      ],
+      "id": "6019261c-c1c3-4256-a0f2-6bdb1df04ad3",
+      "name": "Taxa acima de 30%?"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://webhook.site/f4f804d4-f6bf-4abb-a567-4755dc685561",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"alert\": \"⚠️ ATENÇÃO: afiliado com alta taxa de cancelamento\",\n  \"affiliate_id\": {{ $('Webhook').item.json.body.affiliate_id }},\n  \"cancellation_rate\": {{ $('Consultar resumo do afiliado').item.json.data.cancellation_rate }},\n  \"order_id\": {{ $('Webhook').item.json.body.order_id }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        832,
+        -80
+      ],
+      "id": "8f56a048-100f-47b2-8266-1a785a2ce295",
+      "name": "Alerta afiliado (mock)"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://webhook.site/f4f804d4-f6bf-4abb-a567-4755dc685561",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"sheet\": \"pedidos_cancelados\",\n  \"order_id\": {{ $('Webhook').item.json.body.order_id }},\n  \"affiliate_id\": {{ $('Webhook').item.json.body.affiliate_id }},\n  \"total_value\": {{ $('Webhook').item.json.body.total_value }},\n  \"cancelled_at\": \"{{ $('Webhook').item.json.body.occurred_at }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1056,
+        80
+      ],
+      "id": "1f47af37-d7b7-497d-9597-77b63501be15",
+      "name": "Registrar cancelamento (mock)"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Consultar resumo do afiliado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar resumo do afiliado": {
+      "main": [
+        [
+          {
+            "node": "Taxa acima de 30%?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Taxa acima de 30%?": {
+      "main": [
+        [
+          {
+            "node": "Alerta afiliado (mock)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Registrar cancelamento (mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Alerta afiliado (mock)": {
+      "main": [
+        [
+          {
+            "node": "Registrar cancelamento (mock)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "63e8a5e7-3398-4bca-82cb-4721af8174a7",
+  "meta": {
+    "instanceId": "67f6136e8be012d9b57e5f28f2c1eb61ae71b3460692a76f936835de3af47ae5"
+  },
+  "nodeGroups": [],
+  "id": "VcJt4NmldGh1FThU",
+  "tags": []
+}

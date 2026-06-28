@@ -16,6 +16,13 @@ class SendOrderWebhookJob implements ShouldQueue
 
     public int $tries = 3;
 
+    // mapeia o novo status para o caminho do webhook no N8N.
+    // status sem workflow dedicado não disparam (ex.: refunded).
+    private const STATUS_PATHS = [
+        'approved'  => 'order-approved',
+        'cancelled' => 'order-cancelled',
+    ];
+
     public function __construct(
         public int $orderId,
         public int $affiliateId,
@@ -25,7 +32,7 @@ class SendOrderWebhookJob implements ShouldQueue
     ) {}
 
     /**
-     * Backoff exponencial: espera 10s, depois 20s, depois 40s entre tentativas.
+     * Backoff exponencial: 10s, 20s, 40s entre tentativas.
      */
     public function backoff(): array
     {
@@ -34,15 +41,23 @@ class SendOrderWebhookJob implements ShouldQueue
 
     public function handle(): void
     {
-        $url = config('services.n8n.webhook_url');
+        $path = self::STATUS_PATHS[$this->newStatus] ?? null;
 
-        // Sem URL configurada: não é erro, apenas não há para onde enviar.
-        if (empty($url)) {
+        // status sem workflow dedicado: nada a fazer, sai sem erro.
+        if ($path === null) {
+            return;
+        }
+
+        $base = rtrim((string) config('services.n8n.webhook_url'), '/');
+
+        if ($base === '') {
             Log::warning('N8N_WEBHOOK_URL não configurada; webhook não enviado.', [
                 'order_id' => $this->orderId,
             ]);
             return;
         }
+
+        $url = "{$base}/webhook/{$path}";
 
         $payload = [
             'event'           => 'order.status_changed',
@@ -56,7 +71,7 @@ class SendOrderWebhookJob implements ShouldQueue
 
         $response = Http::timeout(10)->acceptJson()->post($url, $payload);
 
-        // Lança exceção em caso de 4xx/5xx para acionar o retry com backoff.
+        // 4xx/5xx aciona o retry com backoff.
         $response->throw();
     }
 }
