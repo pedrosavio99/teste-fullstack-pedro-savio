@@ -89,15 +89,16 @@ class OrderService
 
     public function forgetMetricsCache(): void
     {
-        Cache::store('redis')->forget('orders:metrics');
+        Cache::forget('orders:metrics');
     }
 
     /**
-     * Métricas agregadas com cache de 5 minutos no Redis.
+     * Métricas agregadas com cache de 5 minutos.
+     * Usa o cache padrão do ambiente (Redis em produção, array em testes).
      */
     public function metrics(): array
     {
-        return Cache::store('redis')->remember('orders:metrics', now()->addMinutes(5), function () {
+        return Cache::remember('orders:metrics', now()->addMinutes(5), function () {
             return array_merge(
                 $this->orders->metrics(),
                 ['cached_at' => now()->toIso8601String()]
@@ -105,10 +106,6 @@ class OrderService
         });
     }
 
-    /**
-     * Resumo do afiliado: total de pedidos, receita, ticket médio
-     * e taxa de cancelamento.
-     */
     public function affiliateSummary(int $affiliateId): array
     {
         return $this->orders->affiliateSummary($affiliateId);
