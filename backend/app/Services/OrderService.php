@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\OrderStatusChanged;
 use App\Exceptions\InvalidStatusTransitionException;
 use App\Models\Order;
 use App\Models\OrderStatusLog;
@@ -49,8 +50,8 @@ class OrderService
     }
 
     /**
-     * Muda o status respeitando a máquina de estados, grava a auditoria
-     * e invalida o cache de métricas.
+     * Muda o status respeitando a máquina de estados, grava a auditoria,
+     * invalida o cache de métricas e dispara o evento de mudança.
      *
      * @throws InvalidStatusTransitionException
      */
@@ -74,9 +75,16 @@ class OrderService
             ]);
         });
 
+        // invalida o cache de métricas, já que os números mudaram
         $this->forgetMetricsCache();
 
-        return $order->refresh();
+        $order->refresh();
+
+        // dispara o evento DEPOIS do commit: o listener enfileira o job
+        // que envia o webhook ao N8N. Falha no envio não afeta esta operação.
+        OrderStatusChanged::dispatch($order, $current, $newStatus);
+
+        return $order;
     }
 
     public function forgetMetricsCache(): void
